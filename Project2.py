@@ -5,6 +5,7 @@ import os
 import csv
 import unittest
 
+# Collaborator(s): Aaron Huang
 
 def get_titles_from_search_results(filename):
     """
@@ -14,8 +15,26 @@ def get_titles_from_search_results(filename):
 
     [('Book title 1', 'Author 1'), ('Book title 2', 'Author 2')...]
     """
+    with open(filename) as fp:
+        soup = BeautifulSoup(fp, "html.parser")
+    
+    tlist = []
+    btitles = soup.find_all("a", class_="bookTitle")
+    for t in btitles:
+        tlist.append(t.text.strip())
+    
+    alist = []
+    anames = soup.find_all("a", class_="authorName")
+    for a in anames:
+        alist.append(a.text.strip())
+    
+    tuples = list(zip(tlist, alist))
+    return tuples
 
-    pass
+
+    
+
+
 
 
 def get_search_links():
@@ -31,8 +50,27 @@ def get_search_links():
     “https://www.goodreads.com/book/show/kdkd".
 
     """
-
-    pass
+    url = "https://www.goodreads.com/search?q=fantasy&qid=NwUsLiA2Nc"
+    resp = requests.get(url)
+    soup = BeautifulSoup(resp.content, 'html.parser')
+    a = soup.find("a", class_ = "bookTitle")
+    tags = a.find_all("href")
+    lst = []
+    for tag in tags:
+        lst.append("https://www.goodreads.com" + tag.get('href', None)) 
+    print(tags)
+    
+    # books = soup.find("a", class_= "bookTitle")
+    # tags = books.find_all('href')
+    # for tag in tags:
+    #     print(tag.get('href', None))
+    # tags = books.find_all('href')
+    # lst = []
+    # for tag in tags:
+    #     lst.append(tag)
+    # print(tags)
+    # print(lst)
+    
 
 
 def get_book_summary(book_url):
@@ -48,8 +86,19 @@ def get_book_summary(book_url):
     You can easily capture CSS selectors with your browser's inspector window.
     Make sure to strip() any newlines from the book title and number of pages.
     """
+    resp = requests.get(book_url)
+    soup = BeautifulSoup(resp.content, 'html.parser')
+    
+    #author name
+    div = soup.find("div", class_='authorName__container')
+    tags = div.find('a', class_ = "authorName")
 
-    pass
+    t_div = soup.find("div", class_ = 'bookTitle')
+    # print(au_tags)
+    # # for tag in au_tags:
+    # #     print(tag.get('href', None))
+
+    
 
 
 def summarize_best_books(filepath):
@@ -63,6 +112,8 @@ def summarize_best_books(filepath):
     ("Fiction", "The Testaments (The Handmaid's Tale, #2)", "https://www.goodreads.com/choiceawards/best-fiction-books-2020") 
     to your list of tuples.
     """
+    lst = []
+
     pass
 
 
@@ -86,7 +137,13 @@ def write_csv(data, filename):
 
     This function should not return anything.
     """
-    pass
+    with open(filename, 'w', newline = '') as file:
+        writer = csv.writer(file)
+        writer.writerow(["Book title", "Author Name"])
+        for tple in data:
+            writer.writerow(tple)
+
+
 
 
 def extra_credit(filepath):
@@ -101,7 +158,7 @@ def extra_credit(filepath):
 class TestCases(unittest.TestCase):
 
     # call get_search_links() and save it to a static variable: search_urls
-
+    search_urls = get_search_links()
 
     def test_get_titles_from_search_results(self):
         # call get_titles_from_search_results() on search_results.htm and save to a local variable
@@ -115,6 +172,7 @@ class TestCases(unittest.TestCase):
         # check that the first book and author tuple is correct (open search_results.htm and find it)
 
         # check that the last title is correct (open search_results.htm and find it)
+        pass
 
     def test_get_search_links(self):
         # check that TestCases.search_urls is a list
@@ -124,6 +182,7 @@ class TestCases(unittest.TestCase):
 
         # check that each URL in the TestCases.search_urls is a string
         # check that each URL contains the correct url for Goodreads.com followed by /book/show/
+        pass
 
 
     def test_get_book_summary(self):
@@ -141,6 +200,7 @@ class TestCases(unittest.TestCase):
             # check that the third element in the tuple, i.e. pages is an int
 
             # check that the first book in the search has 337 pages
+            pass
 
 
     def test_summarize_best_books(self):
@@ -155,7 +215,7 @@ class TestCases(unittest.TestCase):
         # check that the first tuple is made up of the following 3 strings:'Fiction', "The Midnight Library", 'https://www.goodreads.com/choiceawards/best-fiction-books-2020'
 
         # check that the last tuple is made up of the following 3 strings: 'Picture Books', 'A Beautiful Day in the Neighborhood: The Poetry of Mister Rogers', 'https://www.goodreads.com/choiceawards/best-picture-books-2020'
-
+        pass
 
     def test_write_csv(self):
         # call get_titles_from_search_results on search_results.htm and save the result to a variable
@@ -172,6 +232,7 @@ class TestCases(unittest.TestCase):
         # check that the next row is 'Harry Potter and the Deathly Hallows (Harry Potter, #7)', 'J.K. Rowling'
 
         # check that the last row is 'Harry Potter: The Prequel (Harry Potter, #0.5)', 'Julian Harrison (Introduction)'
+        pass
 
 
 
